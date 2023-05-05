@@ -7,6 +7,6 @@ public static class SystemCommands
 {
     public static List<BaseCommand> GetCommands() => new()
     {
-        new YoutubeCommand()
+        new YoutubeCommand("Открой ютюб", "https://www.youtube.com")
     };
 }

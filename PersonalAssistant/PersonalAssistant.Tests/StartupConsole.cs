@@ -16,6 +16,8 @@ public class StartupConsole : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        _commandHandler.LoadCommands(null);
+        
         _voiceRecognizer.Init();
         _voiceRecognizer.StartListen();
         _voiceRecognizer.VoiceRecognized += OnVoiceRecognized;

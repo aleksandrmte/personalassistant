@@ -8,4 +8,8 @@ public class YoutubeCommand : BaseCommand
     {
         await Task.FromResult(Process.Start("explorer", Action));
     }
+
+    public YoutubeCommand(string command, string action) : base(command, action)
+    {
+    }
 }

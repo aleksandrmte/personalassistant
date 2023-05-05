@@ -2,7 +2,12 @@
 
 public abstract class BaseCommand
 {
-    public string Command { get; set; }
-    public string Action { get; set; }
+    protected BaseCommand(string command, string action)
+    {
+        Command = command?.ToLower();
+        Action = action;
+    }
+    public string Command { get; }
+    public string Action { get; }
     public abstract Task Execute();
 }

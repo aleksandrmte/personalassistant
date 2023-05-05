@@ -6,19 +6,17 @@ public class CommandHandler
 {
     private readonly string _wakeUpCommand;
     private readonly AiQuestionAssistant _aiQuestionAssistant;
-    private List<BaseCommand> _commands;
+    private readonly List<BaseCommand> _commands;
 
     public CommandHandler(string wakeUpCommand, AiQuestionAssistant aiQuestionAssistant)
     {
-        _wakeUpCommand = wakeUpCommand;
+        _wakeUpCommand = wakeUpCommand.ToLower();
         _aiQuestionAssistant = aiQuestionAssistant;
-        _commands = new List<BaseCommand>();
+        _commands = SystemCommands.GetCommands();
     }
 
     public void LoadCommands(IEnumerable<BaseCommand> commands)
     {
-        _commands = SystemCommands.GetCommands();
-        
         commands = commands?.ToList() ?? new List<BaseCommand>();
 
         _commands.AddRange(commands);
@@ -31,7 +29,7 @@ public class CommandHandler
             return string.Empty;
         }
 
-        commandText = commandText.Trim();
+        commandText = commandText.Trim().ToLower();
         
         if (!commandText.StartsWith(_wakeUpCommand))
         {
