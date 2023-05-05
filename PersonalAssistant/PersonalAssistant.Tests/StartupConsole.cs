@@ -6,12 +6,12 @@ namespace PersonalAssistant.Tests;
 public class StartupConsole : IHostedService
 {
     private readonly VoiceRecognizer _voiceRecognizer;
-    private readonly AiQuestionAssistant _aiQuestionAssistant;
+    private readonly CommandHandler _commandHandler;
 
-    public StartupConsole(VoiceRecognizer voiceRecognizer, AiQuestionAssistant aiQuestionAssistant)
+    public StartupConsole(VoiceRecognizer voiceRecognizer, CommandHandler commandHandler)
     {
         _voiceRecognizer = voiceRecognizer;
-        _aiQuestionAssistant = aiQuestionAssistant;
+        _commandHandler = commandHandler;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -25,7 +25,7 @@ public class StartupConsole : IHostedService
 
     private async void OnVoiceRecognized(object sender, string text)
     {
-        var ask = await _aiQuestionAssistant.AskQuestion(text, 50);
+        var ask = await _commandHandler.HandleCommand(text, true);
         Console.WriteLine(ask);
     }
 

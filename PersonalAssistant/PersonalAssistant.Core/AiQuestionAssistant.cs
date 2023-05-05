@@ -1,4 +1,5 @@
-﻿using OpenAI.GPT3.Managers;
+﻿using OpenAI.GPT3.Interfaces;
+using OpenAI.GPT3.Managers;
 using OpenAI.GPT3.ObjectModels;
 using OpenAI.GPT3.ObjectModels.RequestModels;
 
@@ -6,9 +7,9 @@ namespace PersonalAssistant.Core;
 
 public class AiQuestionAssistant
 {
-    private readonly OpenAIService _openAiService;
+    private readonly IOpenAIService _openAiService;
 
-    public AiQuestionAssistant(OpenAIService openAiService)
+    public AiQuestionAssistant(IOpenAIService openAiService)
     {
         _openAiService = openAiService;
     }

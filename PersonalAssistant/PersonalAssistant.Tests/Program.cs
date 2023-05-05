@@ -42,8 +42,9 @@ internal class Program
             {
                 var modelPath = hostContext.Configuration.GetSection("ModelPath");
                 var apiKey = hostContext.Configuration.GetSection("ApiKey");
+                var wakeUpCommand = hostContext.Configuration.GetSection("WakeUpCommand");
 
-                services.CoreConfigure(modelPath.Value, apiKey.Value);
+                services.CoreConfigure(modelPath.Value, apiKey.Value, wakeUpCommand.Value);
 
                 services.AddHostedService<StartupConsole>();
 

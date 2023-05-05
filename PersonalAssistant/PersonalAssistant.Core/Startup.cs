@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NAudio.Wave;
 using OpenAI.GPT3;
+using OpenAI.GPT3.Interfaces;
 using OpenAI.GPT3.Managers;
 using Vosk;
 
@@ -8,13 +9,16 @@ namespace PersonalAssistant.Core;
 
 public static class Startup
 {
-    public static void CoreConfigure(this IServiceCollection services, string modelPath, string apiKey)
+    public static void CoreConfigure(this IServiceCollection services, string modelPath, string apiKey, string wakeUpCommand)
     {
         var model = new Model(modelPath);
         services.AddSingleton(model);
                     
         var openAiService = new OpenAIService(new OpenAiOptions { ApiKey = apiKey });
-        services.AddSingleton(openAiService);
+        services.AddSingleton<IOpenAIService>(openAiService);
+
+        var aiQuestionAssistant = new AiQuestionAssistant(openAiService);
+        services.AddSingleton(aiQuestionAssistant);
                     
         var waveIn = new WaveInEvent
         {
@@ -22,9 +26,9 @@ public static class Startup
             WaveFormat = new WaveFormat(rate: 16000, bits: 16, channels: 1),
             BufferMilliseconds = 20
         };
-        services.AddSingleton(waveIn);
-
+        services.AddSingleton<IWaveIn>(waveIn);
+        
         services.AddSingleton<VoiceRecognizer>();
-        services.AddSingleton<AiQuestionAssistant>();
+        services.AddSingleton(new CommandHandler(wakeUpCommand, aiQuestionAssistant));
     }
 }

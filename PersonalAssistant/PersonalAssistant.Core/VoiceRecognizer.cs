@@ -8,14 +8,14 @@ namespace PersonalAssistant.Core;
 public class VoiceRecognizer
 {
     private readonly VoskRecognizer _voskRecognizer;
-    private readonly WaveInEvent _waveIn;
+    private readonly IWaveIn _waveIn;
     private readonly List<string> _stringParts;
     private DateTime _lastAcceptVoiceTime;
     private Timer _timer;
     private int _partsCount;
     public event EventHandler<string> VoiceRecognized;
 
-    public VoiceRecognizer(Model languageModel, WaveInEvent waveIn)
+    public VoiceRecognizer(Model languageModel, IWaveIn waveIn)
     {
         _waveIn = waveIn;
         _stringParts = new List<string>();
@@ -56,13 +56,17 @@ public class VoiceRecognizer
 
             VoiceRecognized?.Invoke(this, text);
 
-            _stringParts.Clear();
-            _partsCount = 0;
-
-            _voskRecognizer.Reset();
-            _waveIn.StartRecording();
-            _timer = new Timer(TimerCallback, null, 0, 200);
+            Reset();
         }
+    }
+
+    private void Reset()
+    {
+        _stringParts.Clear();
+        _partsCount = 0;
+        _voskRecognizer.Reset();
+        _waveIn.StartRecording();
+        _timer = new Timer(TimerCallback, null, 0, 200);
     }
 
     public void StartListen()
