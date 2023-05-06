@@ -3,23 +3,28 @@ using NAudio.Wave;
 using OpenAI.GPT3;
 using OpenAI.GPT3.Interfaces;
 using OpenAI.GPT3.Managers;
+using PersonalAssistant.Core.AssistantModels;
+using PersonalAssistant.Core.Enums;
 using Vosk;
 
 namespace PersonalAssistant.Core;
 
 public static class Startup
 {
-    public static void CoreConfigure(this IServiceCollection services, string modelPath, string apiKey, string wakeUpCommand)
+    public static void ConfigureAssistant(this IServiceCollection services, Action<AssistantOptions> setupOptions)
     {
-        var model = new Model(modelPath);
-        services.AddSingleton(model);
-                    
-        var openAiService = new OpenAIService(new OpenAiOptions { ApiKey = apiKey });
+        var options = new AssistantOptions();
+        setupOptions(options);
+        
+        var languageModel = new Model(options.LanguageModelPath);
+        services.AddSingleton(languageModel);
+
+        var openAiService = new OpenAIService(new OpenAiOptions { ApiKey = options.OpenAiKey });
         services.AddSingleton<IOpenAIService>(openAiService);
 
         var aiQuestionAssistant = new AiQuestionAssistant(openAiService);
         services.AddSingleton(aiQuestionAssistant);
-                    
+
         var waveIn = new WaveInEvent
         {
             DeviceNumber = 0, // indicates which microphone to use
@@ -27,8 +32,13 @@ public static class Startup
             BufferMilliseconds = 20
         };
         services.AddSingleton<IWaveIn>(waveIn);
-        
-        services.AddSingleton<VoiceRecognizer>();
-        services.AddSingleton(new CommandHandler(wakeUpCommand, aiQuestionAssistant));
+
+        var voiceRecognizer = new VoiceRecognizer(languageModel, waveIn);
+        services.AddSingleton(voiceRecognizer);
+
+        var commandHandler = new CommandHandler(options.WakeUpCommand, aiQuestionAssistant, options.ThresholdRecognizeCommandPercent);
+        services.AddSingleton(commandHandler);
+
+        services.AddSingleton(new Assistant(voiceRecognizer, commandHandler, options.CommandHandleType));
     }
 }

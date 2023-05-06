@@ -1,4 +1,5 @@
 ﻿using PersonalAssistant.Core.Commands;
+using PersonalAssistant.Core.Enums;
 
 namespace PersonalAssistant.Core;
 
@@ -6,23 +7,23 @@ public class CommandHandler
 {
     private readonly string _wakeUpCommand;
     private readonly AiQuestionAssistant _aiQuestionAssistant;
-    private readonly List<BaseCommand> _commands;
+    private readonly CommandRecognizer _commandRecognizer;
+    public event EventHandler<Task> BeforeExecuteCommand;
+    public event EventHandler<Task> BeforeSearchAi;
 
-    public CommandHandler(string wakeUpCommand, AiQuestionAssistant aiQuestionAssistant)
+    public CommandHandler(string wakeUpCommand, AiQuestionAssistant aiQuestionAssistant, double thresholdRecognizeCommandPercent)
     {
         _wakeUpCommand = wakeUpCommand.ToLower();
         _aiQuestionAssistant = aiQuestionAssistant;
-        _commands = SystemCommands.GetCommands();
-    }
-
-    public void LoadCommands(IEnumerable<BaseCommand> commands)
-    {
-        commands = commands?.ToList() ?? new List<BaseCommand>();
-
-        _commands.AddRange(commands);
+        _commandRecognizer = new CommandRecognizer(SystemCommands.GetCommands(), thresholdRecognizeCommandPercent);
     }
     
-    public async Task<string> HandleCommand(string commandText, bool useAi)
+    public void LoadCommands(IEnumerable<BaseCommand> commands)
+    {
+        _commandRecognizer.AddCommands(commands);
+    }
+    
+    public async Task<string> HandleCommand(string commandText, CommandHandleType handleType)
     {
         if (string.IsNullOrEmpty(commandText))
         {
@@ -38,15 +39,23 @@ public class CommandHandler
 
         commandText = commandText.Replace(_wakeUpCommand, string.Empty).Trim();
 
-        var command = _commands.FirstOrDefault(x => x.Command == commandText);
-
-        if (command == null)
+        if (handleType is CommandHandleType.UseAll or CommandHandleType.UseOnlyCommands)
         {
-            return useAi ? await _aiQuestionAssistant.AskQuestion(commandText, 50) : string.Empty;
-        }
-        
-        await command.Execute();
-        return string.Empty;
+            var command = _commandRecognizer.GetCommand(commandText);
 
+            if (command != null)
+            {
+                BeforeExecuteCommand?.Invoke(this, Task.CompletedTask);
+                
+                await command.Execute();
+            }
+        }
+
+        if (handleType is CommandHandleType.UseOnlyCommands)
+            return string.Empty;
+
+        BeforeSearchAi?.Invoke(this, Task.CompletedTask);
+        
+        return await _aiQuestionAssistant.AskQuestion(commandText, 100);
     }
 }

@@ -2,9 +2,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using PersonalAssistant.Core;
+using PersonalAssistant.Core.Enums;
 using PersonalAssistant.Tests;
 
-internal class Program
+internal static class Program
 {
     private static void Main(string[] args)
     {
@@ -40,11 +41,13 @@ internal class Program
         {
             try
             {
-                var modelPath = hostContext.Configuration.GetSection("ModelPath");
-                var apiKey = hostContext.Configuration.GetSection("ApiKey");
-                var wakeUpCommand = hostContext.Configuration.GetSection("WakeUpCommand");
-
-                services.CoreConfigure(modelPath.Value, apiKey.Value, wakeUpCommand.Value);
+                services.ConfigureAssistant(options =>
+                {
+                    options.CommandHandleType = CommandHandleType.UseAll;
+                    options.LanguageModelPath = hostContext.Configuration.GetSection("LanguageModelPath")?.Value;
+                    options.OpenAiKey = hostContext.Configuration.GetSection("OpenAiKey")?.Value;
+                    options.WakeUpCommand = hostContext.Configuration.GetSection("WakeUpCommand")?.Value;
+                });
 
                 services.AddHostedService<StartupConsole>();
 

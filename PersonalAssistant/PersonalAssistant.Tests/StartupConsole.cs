@@ -1,38 +1,57 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Hosting;
 using PersonalAssistant.Core;
 
 namespace PersonalAssistant.Tests;
 
 public class StartupConsole : IHostedService
 {
-    private readonly VoiceRecognizer _voiceRecognizer;
-    private readonly CommandHandler _commandHandler;
+    private readonly Assistant _assistant;
 
-    public StartupConsole(VoiceRecognizer voiceRecognizer, CommandHandler commandHandler)
+    public StartupConsole(Assistant assistant)
     {
-        _voiceRecognizer = voiceRecognizer;
-        _commandHandler = commandHandler;
+        _assistant = assistant;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _commandHandler.LoadCommands(null);
+        _assistant.LoadCommands(null);
+        _assistant.Start();
         
-        _voiceRecognizer.Init();
-        _voiceRecognizer.StartListen();
-        _voiceRecognizer.VoiceRecognized += OnVoiceRecognized;
+        _assistant.VoiceRecognized += OnVoiceRecognized;
+        _assistant.BeforeExecuteCommand += AssistantOnBeforeExecuteCommand;
+        _assistant.BeforeSearchAi += AssistantOnBeforeSearchAi;
         
         return Task.CompletedTask;
     }
 
-    private async void OnVoiceRecognized(object sender, string text)
+    private static void AssistantOnBeforeSearchAi(object sender, Task e)
     {
-        var ask = await _commandHandler.HandleCommand(text, true);
-        Console.WriteLine(ask);
+        PlaySound(@"E:\\siri-vot-chto-mne-udalos-naiti.mp3");
+    }
+
+    private static void AssistantOnBeforeExecuteCommand(object sender, Task e)
+    {
+        PlaySound(@"E:\\zvuk-siri-pered-otvetom.mp3");
+    }
+
+    private static void OnVoiceRecognized(object sender, string text)
+    {
+        Console.WriteLine(text);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _voiceRecognizer.StopListen();
+        await _assistant.StopAsync();
+    }
+
+    private static void PlaySound(string soundPath)
+    {
+        var ps = new ProcessStartInfo(soundPath)
+        {
+            UseShellExecute = true,
+            Verb = "open"
+        };
+        Process.Start(ps);
     }
 }
