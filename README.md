@@ -1,0 +1,2 @@
+# personalassistant
+OpenAi + Vosk + Speechsynthesizer
