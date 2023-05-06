@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Speech.Synthesis;
 using Microsoft.Extensions.Hosting;
 using PersonalAssistant.Core;
 
@@ -38,6 +39,11 @@ public class StartupConsole : IHostedService
     private static void OnVoiceRecognized(object sender, string text)
     {
         Console.WriteLine(text);
+        
+        var voice = new SpeechSynthesizer();
+        voice.SetOutputToDefaultAudioDevice();
+        voice.Rate = 4;
+        voice.Speak(text);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
