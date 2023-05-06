@@ -48,6 +48,8 @@ public class CommandHandler
                 BeforeExecuteCommand?.Invoke(this, Task.CompletedTask);
                 
                 await command.Execute();
+
+                return string.Empty;
             }
         }
 
