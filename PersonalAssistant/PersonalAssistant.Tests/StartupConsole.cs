@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using NAudio.Wave;
 using PersonalAssistant.Core;
+using PersonalAssistant.Core.Commands;
 
 namespace PersonalAssistant.Tests;
 
@@ -22,8 +23,17 @@ public class StartupConsole : IHostedService
         _assistant.VoiceRecognized += OnVoiceRecognized;
         _assistant.BeforeExecuteCommand += AssistantOnBeforeExecuteCommand;
         _assistant.BeforeSearchAi += AssistantOnBeforeSearchAi;
+        _assistant.AfterExecuteCommand += AssistantOnAfterExecuteCommand;
         
         return Task.CompletedTask;
+    }
+
+    private static void AssistantOnAfterExecuteCommand(object sender, CommandResult e)
+    {
+        if (!string.IsNullOrEmpty(e.SayCommand))
+        {
+            PlayVoice(e.SayCommand);
+        }
     }
 
     private static void AssistantOnBeforeSearchAi(object sender, Task e)
@@ -39,11 +49,7 @@ public class StartupConsole : IHostedService
     private static void OnVoiceRecognized(object sender, string text)
     {
         Console.WriteLine(text);
-        
-        var voice = new SpeechSynthesizer();
-        voice.SetOutputToDefaultAudioDevice();
-        voice.Rate = 4;
-        voice.Speak(text);
+        PlayVoice(text);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -53,6 +59,14 @@ public class StartupConsole : IHostedService
         _assistant.BeforeSearchAi -= AssistantOnBeforeSearchAi;
         
         await _assistant.StopAsync();
+    }
+
+    private static void PlayVoice(string text)
+    {
+        var voice = new SpeechSynthesizer();
+        voice.SetOutputToDefaultAudioDevice();
+        voice.Rate = 4;
+        voice.Speak(text);
     }
 
     private static void PlaySound(string soundPath)

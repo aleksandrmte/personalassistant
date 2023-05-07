@@ -6,8 +6,10 @@ public class CustomCommand : BaseCommand
     {
     }
     
-    public override async Task Execute()
+    public override async Task<CommandResult> Execute()
     {
         Console.WriteLine("Custom");
+
+        return await Task.FromResult(CommandResult.Ok());
     }
 }

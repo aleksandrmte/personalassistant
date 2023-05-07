@@ -10,6 +10,7 @@ public class Assistant
     private readonly CommandHandleType _handleType;
     public event EventHandler<string> VoiceRecognized;
     public event EventHandler<Task> BeforeExecuteCommand;
+    public event EventHandler<CommandResult> AfterExecuteCommand; 
     public event EventHandler<Task> BeforeSearchAi;
 
     public Assistant(VoiceRecognizer voiceRecognizer, CommandHandler commandHandler, CommandHandleType handleType)
@@ -17,6 +18,22 @@ public class Assistant
         _voiceRecognizer = voiceRecognizer;
         _commandHandler = commandHandler;
         _handleType = handleType;
+    }
+    
+    public void Start()
+    {
+        _voiceRecognizer.Init();
+        _voiceRecognizer.StartListen();
+        _voiceRecognizer.VoiceRecognized += OnVoiceRecognized;
+        
+        _commandHandler.BeforeExecuteCommand += CommandHandlerOnBeforeExecuteCommand;
+        _commandHandler.BeforeSearchAi += CommandHandlerOnBeforeSearchAi;
+        _commandHandler.AfterExecuteCommand += CommandHandlerOnAfterExecuteCommand;
+    }
+    
+    public void LoadCommands(IEnumerable<BaseCommand> commands)
+    {
+        _commandHandler.LoadCommands(commands);
     }
 
     private void CommandHandlerOnBeforeSearchAi(object sender, Task e)
@@ -29,25 +46,16 @@ public class Assistant
         BeforeExecuteCommand?.Invoke(this, Task.CompletedTask);
     }
 
-    public void LoadCommands(IEnumerable<BaseCommand> commands)
+    private void CommandHandlerOnAfterExecuteCommand(object sender, CommandResult e)
     {
-        _commandHandler.LoadCommands(commands);
+        AfterExecuteCommand?.Invoke(this, e);
     }
 
-    public void Start()
-    {
-        _voiceRecognizer.Init();
-        _voiceRecognizer.StartListen();
-        _voiceRecognizer.VoiceRecognized += OnVoiceRecognized;
-        
-        _commandHandler.BeforeExecuteCommand += CommandHandlerOnBeforeExecuteCommand;
-        _commandHandler.BeforeSearchAi += CommandHandlerOnBeforeSearchAi;
-    }
-    
     public async Task StopAsync()
     {
         _commandHandler.BeforeExecuteCommand -= CommandHandlerOnBeforeExecuteCommand;
         _commandHandler.BeforeSearchAi -= CommandHandlerOnBeforeSearchAi;
+        _commandHandler.AfterExecuteCommand -= CommandHandlerOnAfterExecuteCommand;
         
         _voiceRecognizer.VoiceRecognized -= OnVoiceRecognized;
         await _voiceRecognizer.StopListen();

@@ -9,6 +9,7 @@ public class CommandHandler
     private readonly AiQuestionAssistant _aiQuestionAssistant;
     private readonly CommandRecognizer _commandRecognizer;
     public event EventHandler<Task> BeforeExecuteCommand;
+    public event EventHandler<CommandResult> AfterExecuteCommand; 
     public event EventHandler<Task> BeforeSearchAi;
 
     public CommandHandler(string wakeUpCommand, AiQuestionAssistant aiQuestionAssistant, double thresholdRecognizeCommandPercent)
@@ -47,7 +48,9 @@ public class CommandHandler
             {
                 BeforeExecuteCommand?.Invoke(this, Task.CompletedTask);
                 
-                await command.Execute();
+                var commandResult = await command.Execute();
+
+                AfterExecuteCommand?.Invoke(this, commandResult);
 
                 return string.Empty;
             }

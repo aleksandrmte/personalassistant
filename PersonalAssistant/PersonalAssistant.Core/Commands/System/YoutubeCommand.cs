@@ -4,12 +4,14 @@ namespace PersonalAssistant.Core.Commands.System;
 
 public class YoutubeCommand : BaseCommand
 {
-    public override async Task Execute()
-    {
-        await Task.FromResult(Process.Start("explorer", Action));
-    }
-
     public YoutubeCommand(string command, string action) : base(command, action)
     {
+    }
+    
+    public override async Task<CommandResult> Execute()
+    {
+        await Task.FromResult(Process.Start("explorer", Action));
+
+        return CommandResult.Ok();
     }
 }

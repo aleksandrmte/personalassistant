@@ -7,6 +7,7 @@ public static class SystemCommands
     public static List<BaseCommand> GetCommands() => new()
     {
         new YoutubeCommand("Открой ютюб", "https://www.youtube.com"),
-        new CustomCommand("Остановись", "Хорошо")
+        new CustomCommand("Остановись", "Хорошо"),
+        new GetTimeCommand("Сколько сейчас время", string.Empty)
     };
 }

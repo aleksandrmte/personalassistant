@@ -9,5 +9,5 @@ public abstract class BaseCommand
     }
     public string Command { get; }
     public string Action { get; }
-    public abstract Task Execute();
+    public abstract Task<CommandResult> Execute();
 }
