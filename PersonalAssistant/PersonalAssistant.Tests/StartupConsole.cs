@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Speech.Synthesis;
 using Microsoft.Extensions.Hosting;
+using NAudio.Wave;
 using PersonalAssistant.Core;
 
 namespace PersonalAssistant.Tests;
@@ -53,11 +54,13 @@ public class StartupConsole : IHostedService
 
     private static void PlaySound(string soundPath)
     {
-        var ps = new ProcessStartInfo(soundPath)
+        using var mf = new MediaFoundationReader(soundPath);
+        using var wo = new WasapiOut();
+        wo.Init(mf);
+        wo.Play();
+        while (wo.PlaybackState == PlaybackState.Playing)
         {
-            UseShellExecute = true,
-            Verb = "open"
-        };
-        Process.Start(ps);
+            Thread.Sleep(500);
+        }
     }
 }

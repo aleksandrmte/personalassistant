@@ -21,12 +21,12 @@ public class Assistant
 
     private void CommandHandlerOnBeforeSearchAi(object sender, Task e)
     {
-        BeforeExecuteCommand?.Invoke(this, Task.CompletedTask);
+        BeforeSearchAi?.Invoke(this, Task.CompletedTask);
     }
 
     private void CommandHandlerOnBeforeExecuteCommand(object sender, Task e)
     {
-        BeforeSearchAi?.Invoke(this, Task.CompletedTask);
+        BeforeExecuteCommand?.Invoke(this, Task.CompletedTask);
     }
 
     public void LoadCommands(IEnumerable<BaseCommand> commands)

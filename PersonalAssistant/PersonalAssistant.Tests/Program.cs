@@ -44,6 +44,7 @@ internal static class Program
                 services.ConfigureAssistant(options =>
                 {
                     options.CommandHandleType = CommandHandleType.UseAll;
+                    options.ThresholdRecognizeCommandPercent = 75;
                     options.LanguageModelPath = hostContext.Configuration.GetSection("LanguageModelPath")?.Value;
                     options.OpenAiKey = hostContext.Configuration.GetSection("OpenAiKey")?.Value;
                     options.WakeUpCommand = hostContext.Configuration.GetSection("WakeUpCommand")?.Value;
