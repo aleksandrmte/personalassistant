@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Speech.Synthesis;
+﻿using System.Speech.Synthesis;
 using Microsoft.Extensions.Hosting;
 using NAudio.Wave;
 using PersonalAssistant.Core;
@@ -49,6 +48,10 @@ public class StartupConsole : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        _assistant.VoiceRecognized -= OnVoiceRecognized;
+        _assistant.BeforeExecuteCommand -= AssistantOnBeforeExecuteCommand;
+        _assistant.BeforeSearchAi -= AssistantOnBeforeSearchAi;
+        
         await _assistant.StopAsync();
     }
 

@@ -1,7 +1,6 @@
-﻿using PersonalAssistant.Core.Commands;
-using PersonalAssistant.Core.Commands.System;
+﻿using PersonalAssistant.Core.Commands.System;
 
-namespace PersonalAssistant.Core;
+namespace PersonalAssistant.Core.Commands;
 
 public static class SystemCommands
 {
