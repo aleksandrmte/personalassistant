@@ -9,15 +9,17 @@ namespace PersonalAssistant.Tests;
 public class StartupConsole : IHostedService
 {
     private readonly Assistant _assistant;
+    private readonly AppSettings _appSettings;
 
-    public StartupConsole(Assistant assistant)
+    public StartupConsole(Assistant assistant, AppSettings appSettings)
     {
         _assistant = assistant;
+        _appSettings = appSettings;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _assistant.LoadCommands(null);
+        _assistant.LoadCommands(_appSettings.CustomCommands.Select(CustomCommand.Create));
         _assistant.Start();
         
         _assistant.VoiceRecognized += OnVoiceRecognized;

@@ -1,12 +1,16 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using PersonalAssistant.Core;
+using PersonalAssistant.Core.Commands;
 using PersonalAssistant.Core.Enums;
 using PersonalAssistant.Tests;
 
 internal static class Program
 {
+    private static readonly AppSettings AppSettings = new();
+    
     private static void Main(string[] args)
     {
         try
@@ -41,14 +45,18 @@ internal static class Program
         {
             try
             {
+                hostContext.Configuration.Bind(AppSettings);
+                
                 services.ConfigureAssistant(options =>
                 {
                     options.CommandHandleType = CommandHandleType.UseAll;
                     options.ThresholdRecognizeCommandPercent = 75;
-                    options.LanguageModelPath = hostContext.Configuration.GetSection("LanguageModelPath")?.Value;
-                    options.OpenAiKey = hostContext.Configuration.GetSection("OpenAiKey")?.Value;
-                    options.WakeUpCommand = hostContext.Configuration.GetSection("WakeUpCommand")?.Value;
+                    options.LanguageModelPath = AppSettings.LanguageModelPath;
+                    options.OpenAiKey = AppSettings.OpenAiKey;
+                    options.WakeUpCommand = AppSettings.WakeUpCommand;
                 });
+               
+                services.AddSingleton(AppSettings);
 
                 services.AddHostedService<StartupConsole>();
 
